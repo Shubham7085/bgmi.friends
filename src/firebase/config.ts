@@ -1,19 +1,66 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDummyKeyForDevelopment",
-  authDomain: "bgmi-friends-vault.firebaseapp.com",
-  projectId: "bgmi-friends-vault",
-  storageBucket: "bgmi-friends-vault.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
-};
+const STORAGE_KEY = 'bgmi_firebase_config';
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export default app;
+export interface FirebaseConfigInput {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+}
+
+function getStoredConfig(): FirebaseConfigInput | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as FirebaseConfigInput;
+  } catch {
+    return null;
+  }
+}
+
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
+let initialized = false;
+
+export function isFirebaseConfigured(): boolean {
+  return getStoredConfig() !== null;
+}
+
+export function getFirebaseConfig(): FirebaseConfigInput | null {
+  return getStoredConfig();
+}
+
+export function saveFirebaseConfig(config: FirebaseConfigInput): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+}
+
+export function clearFirebaseConfig(): void {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+export function initFirebase(config?: FirebaseConfigInput): boolean {
+  const cfg = config ?? getStoredConfig();
+  if (!cfg) return false;
+
+  if (initialized) return true;
+
+  app = initializeApp(cfg);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+  initialized = true;
+  return true;
+}
+
+// Auto-init if config exists
+initFirebase();
+
+export { app, auth, db, storage, initialized };

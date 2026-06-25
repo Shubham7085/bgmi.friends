@@ -16,6 +16,7 @@ import SquadPage from './pages/SquadPage';
 import StatisticsPage from './pages/StatisticsPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
+import FirebaseSetupPage from './pages/FirebaseSetupPage';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -40,6 +41,7 @@ function AnimatedRoutes() {
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/setup" element={<FirebaseSetupPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -49,7 +51,7 @@ function AnimatedRoutes() {
 function AppContent() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/setup';
 
   return (
     <div className="min-h-screen bg-[#070B14] relative">
